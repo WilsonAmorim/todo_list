@@ -1,0 +1,16 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class TodoListUiConfig {
+  TodoListUiConfig._();
+
+  static ThemeData get Theme => ThemeData(
+      textTheme: GoogleFonts.mandaliTextTheme(),
+      primaryColor: Color(0xff5C77CE),
+      primaryColorLight: Color(0xffABC8F7),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          primary: Color(0xff5C77CE),
+        ),
+      ));
+}
