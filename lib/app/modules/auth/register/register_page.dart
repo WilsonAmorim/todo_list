@@ -78,10 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     TodoListField(
                       label: 'E-mail',
                       controller: emailEC,
-                      validator: Validatorless.multiple([
-                        Validatorless.required('m'),
-                        Validatorless.email('m')
-                      ]),
+                      validator: (Validatorless),
                     ),
                     SizedBox(
                       height: 20,
@@ -90,6 +87,11 @@ class _RegisterPageState extends State<RegisterPage> {
                       label: 'Senha',
                       controller: passwordEC,
                       obscureText: true,
+                      validator: Validatorless.multiple([
+                        Validatorless.min(
+                            6, 'Senha deve conter pelo menos 6 caracteres'),
+                        Validatorless.required('Senha obrigatória')
+                      ]),
                     ),
                     SizedBox(
                       height: 20,
