@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_list_provaider/app/core/notifier/default_listener_notifier.dart';
+import 'package:todo_list_provaider/app/core/validators/validators.dart';
 import 'package:todo_list_provaider/app/core/widget/todo_list_field.dart';
 import 'package:todo_list_provaider/app/core/widget/todo_list_logo.dart';
+import 'package:todo_list_provaider/app/modules/auth/register/register_controller.dart';
 import 'package:todo_list_provaider/app/modules/ui/theme_extensions.dart';
 import 'package:validatorless/validatorless.dart';
 
@@ -13,16 +17,48 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final emailEC = TextEditingController();
-  final passwordEC = TextEditingController();
-  final confirmPasswordEC = TextEditingController();
+  final _emailEC = TextEditingController();
+  final _passwordEC = TextEditingController();
+  final _confirmPasswordEC = TextEditingController();
 
   @override
   void dispose() {
-    emailEC.dispose();
-    passwordEC.dispose();
-    confirmPasswordEC.dispose();
+    _emailEC.dispose();
+    _passwordEC.dispose();
+    _confirmPasswordEC.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final defaultListener = DefaultListenerNotifier(
+        changeNotifier: context.read<RegisterController>());
+    defaultListener.listener(
+        context: context,
+        successCallback: (notifier, ListenerInstance) {
+          ListenerInstance.dispose();
+          Navigator.of(context).pop();
+        },
+        errorCallback: (notifier, ListenerInstance) {
+          print('Deu Ruim!!!!!!!');
+        });
+
+    // context.read<RegisterController>().addListener(() {
+    //   final controller = context.read<RegisterController>();
+    //   var success = controller.success;
+    //   var error = controller.error;
+    //   if (success) {
+    //     Navigator.of(context).pop();
+    //   } else if (error != null && error.isNotEmpty) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text(error),
+    //         backgroundColor: Colors.red,
+    //       ),
+    //     );
+    //   }
+    // });
   }
 
   @override
@@ -59,74 +95,89 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          children: [
-            Container(
-              height: MediaQuery.of(context).size.width * .5,
-              child: FittedBox(
-                child: TodoListLogo(),
-                fit: BoxFit.fitHeight,
+      body: ListView(
+        children: [
+          Container(
+            height: MediaQuery.of(context).size.width * .5,
+            child: FittedBox(
+              child: TodoListLogo(),
+              fit: BoxFit.fitHeight,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TodoListField(
+                    label: 'E-mail',
+                    controller: _emailEC,
+                    validator: Validatorless.multiple([
+                      Validatorless.required('E-mail obrigatório'),
+                      Validatorless.email('E-mail inválido')
+                    ]),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  TodoListField(
+                    label: 'Senha',
+                    controller: _passwordEC,
+                    obscureText: true,
+                    validator: Validatorless.multiple([
+                      Validatorless.required('Senha obrigatória'),
+                      Validatorless.min(
+                          6, 'Senha deve ter pelo menos 6 caracteres'),
+                    ]),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  TodoListField(
+                    label: 'Confirma Senha',
+                    controller: _confirmPasswordEC,
+                    obscureText: true,
+                    validator: Validatorless.multiple(
+                      [
+                        Validatorless.required('Confirma Senha é Obrigatória'),
+                        Validators.compare(
+                            _passwordEC, 'Senha diferente de Confirma Senha'),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final formValid =
+                            _formKey.currentState?.validate() ?? false;
+                        if (formValid) {
+                          final email = _emailEC.text;
+                          final password = _passwordEC.text;
+                          context
+                              .read<RegisterController>()
+                              .registerUser(email.trim(), password);
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text('Salvar'),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      )),
+                    ),
+                  ),
+                ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-              child: Form(
-                child: Column(
-                  children: [
-                    TodoListField(
-                      label: 'E-mail',
-                      controller: emailEC,
-                      validator: Validatorless.multiple([
-                        Validatorless.required('E-mail obrigatório'),
-                        Validatorless.email('E-mail inválido')
-                      ]),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    TodoListField(
-                      label: 'Senha',
-                      controller: passwordEC,
-                      obscureText: true,
-                      validator: Validatorless.multiple([
-                        Validatorless.required('Senha obrigatória'),
-                        Validatorless.min(
-                            6, 'Senha deve ter pelo menos 6 caracteres'),
-                      ]),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    TodoListField(
-                      label: 'Confirma Senha',
-                      controller: confirmPasswordEC,
-                      obscureText: true,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Text('Salvar'),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        )),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
+          )
+        ],
       ),
     );
   }
