@@ -7,7 +7,7 @@ class TodoListField extends StatelessWidget {
   final bool obscureText;
   final ValueNotifier<bool> obscureTextVN;
   final TextEditingController? controller;
-  final FormFieldValidator? validator;
+  final FormFieldValidator<String>? validator;
 
   TodoListField({
     Key? key,
